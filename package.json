@@ -1,0 +1,14 @@
+{
+  "name": "temple-afinador",
+  "version": "1.0.0",
+  "description": "Afinador de guitarra y biblioteca de acordes: PWA gratuita, sin servidores ni suscripciones.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node tools/serve.mjs 8080",
+    "test": "node --test tests/*.test.mjs",
+    "test:e2e": "node tests/e2e.mjs",
+    "icons": "node tools/make-icons.mjs"
+  },
+  "license": "MIT"
+}

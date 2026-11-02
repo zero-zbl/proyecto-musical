@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Temple · Afinador y acordes</title>
+  <meta name="description" content="Afinador de guitarra y biblioteca de acordes gratuito, sin anuncios y sin conexión.">
+  <meta name="theme-color" content="#0e1116">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Temple">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 22a10 10 0 0 1 20 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M16 22 21 10" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><circle cx="16" cy="22" r="3" fill="var(--accent)"/></svg>
+        <span>Temple</span>
+      </div>
+      <button class="tuning-btn" id="tuningBtn" aria-haspopup="dialog">
+        <span class="tuning-btn-name" id="tuningName">Estándar</span>
+        <span class="tuning-btn-notes" id="tuningNotes">E A D G B E</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+
+    <main>
+      <!-- ============ AFINADOR ============ -->
+      <section class="view active" id="view-tuner" aria-label="Afinador">
+        <div class="mode-switch" role="tablist" aria-label="Modo de afinación">
+          <button role="tab" data-mode="auto" aria-selected="true">Auto</button>
+          <button role="tab" data-mode="manual" aria-selected="false">Manual</button>
+          <button role="tab" data-mode="chromatic" aria-selected="false">Cromático</button>
+        </div>
+
+        <div class="meter" id="meter" data-state="idle">
+          <div class="gauge-wrap">
+          <svg class="gauge" viewBox="0 0 300 170" aria-hidden="true">
+            <defs>
+              <linearGradient id="arcGrad" x1="0" x2="1">
+                <stop offset="0" stop-color="var(--off)"/>
+                <stop offset=".38" stop-color="var(--near)"/>
+                <stop offset=".5" stop-color="var(--accent)"/>
+                <stop offset=".62" stop-color="var(--near)"/>
+                <stop offset="1" stop-color="var(--off)"/>
+              </linearGradient>
+            </defs>
+            <g id="gaugeTicks"></g>
+            <path id="tolZone" fill="none" stroke="var(--accent)" stroke-opacity=".3" stroke-width="16"/>
+            <g id="needle" class="needle">
+              <line x1="150" y1="20" x2="150" y2="52" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="150" cy="20" r="7"/>
+            </g>
+          </svg>
+          <div class="readout">
+            <div class="note" id="noteName"><span class="note-base">–</span><span class="note-acc"></span><sub class="note-oct"></sub></div>
+            <div class="cents" id="centsText">Toca una cuerda</div>
+          </div>
+          </div>
+          <div class="hint" id="hintText" aria-live="polite"></div>
+          <div class="freq" id="freqText">&nbsp;</div>
+          <div class="meter-foot" id="meterFoot">
+            <div class="level" aria-hidden="true"><div class="level-bar" id="levelBar"></div></div>
+            <button class="mic-btn" id="micBtn" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0M12 17v4m-3 0h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span id="micBtnText">Activar micrófono</span>
+            </button>
+          </div>
+        </div>
+        <p class="error" id="micError" role="alert" hidden></p>
+
+        <div class="strings-card">
+          <div class="strings" id="strings" role="list"></div>
+          <div class="strings-footer">
+            <button class="ghost-btn" id="resetTuned" type="button">Reiniciar marcas</button>
+            <span class="muted small" id="tunedCount"></span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============ ACORDES ============ -->
+      <section class="view" id="view-chords" aria-label="Acordes">
+        <div class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-4.5-4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="chordSearch" type="search" placeholder="Buscar: Am7, F#, Solm…" autocomplete="off" autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="chips" id="categoryChips" role="tablist" aria-label="Categoría"></div>
+        <div class="chips roots" id="rootChips" role="tablist" aria-label="Tónica"></div>
+        <p class="muted small chord-note">Diagramas para afinación estándar. Toca un diagrama para escucharlo.</p>
+        <div class="chord-grid" id="chordGrid"></div>
+      </section>
+
+      <!-- ============ AJUSTES ============ -->
+      <section class="view" id="view-settings" aria-label="Ajustes">
+        <h2>Ajustes</h2>
+        <div class="setting">
+          <div><label for="a4Range">Calibración (La4)</label><p class="muted small">Referencia de afinación. Estándar: 440 Hz.</p></div>
+          <div class="stepper">
+            <button type="button" data-a4="-1" aria-label="Bajar">−</button>
+            <output id="a4Value">440 Hz</output>
+            <button type="button" data-a4="1" aria-label="Subir">+</button>
+          </div>
+        </div>
+        <input id="a4Range" type="range" min="420" max="460" step="1" value="440" class="full-range" aria-label="Frecuencia de La4">
+
+        <div class="setting">
+          <div><span class="label">Tolerancia "afinado"</span><p class="muted small">Margen para considerar una cuerda afinada.</p></div>
+          <div class="seg" id="tolSeg">
+            <button type="button" data-v="2">±2¢</button><button type="button" data-v="3">±3¢</button><button type="button" data-v="5">±5¢</button><button type="button" data-v="10">±10¢</button>
+          </div>
+        </div>
+
+        <div class="setting">
+          <div><label for="sensRange">Sensibilidad del micrófono</label><p class="muted small">Súbela si no detecta la cuerda; bájala si hay ruido.</p></div>
+        </div>
+        <input id="sensRange" type="range" min="0" max="1" step="0.05" value="0.5" class="full-range">
+
+        <div class="setting">
+          <div><span class="label">Notación</span></div>
+          <div class="seg" id="notationSeg">
+            <button type="button" data-v="american">C D E</button><button type="button" data-v="latin">Do Re Mi</button>
+          </div>
+        </div>
+
+        <div class="setting">
+          <div><span class="label">Alteraciones</span></div>
+          <div class="seg" id="accSeg">
+            <button type="button" data-v="sharp">♯</button><button type="button" data-v="flat">♭</button>
+          </div>
+        </div>
+
+        <div class="setting">
+          <div><span class="label">Mantener pantalla encendida</span><p class="muted small">Mientras el micrófono está activo.</p></div>
+          <label class="switch"><input type="checkbox" id="wakeToggle" checked><span></span></label>
+        </div>
+
+        <div class="about">
+          <h3>Acerca de</h3>
+          <p>Temple procesa el audio solo en tu dispositivo: no envía nada a internet, no tiene anuncios ni suscripciones. Una vez cargada, funciona sin conexión.</p>
+          <p class="muted small">Detección de tono: algoritmo YIN · <span id="appVersion"></span></p>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabbar" aria-label="Secciones">
+      <button data-view="tuner" class="active">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="m12 16 3.5-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Afinador</span>
+      </button>
+      <button data-view="chords">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 3v18M15 3v18M5 9h14M5 15h14" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/></svg>
+        <span>Acordes</span>
+      </button>
+      <button data-view="settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span>Ajustes</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Hoja de selección de afinación -->
+  <dialog class="sheet" id="tuningSheet" aria-label="Elegir afinación">
+    <div class="sheet-head">
+      <h2>Afinaciones</h2>
+      <button class="icon-btn" data-close aria-label="Cerrar">✕</button>
+    </div>
+    <div class="sheet-body" id="tuningList"></div>
+  </dialog>
+
+  <dialog class="sheet" id="customSheet" aria-label="Afinación personalizada">
+    <div class="sheet-head">
+      <h2>Afinación personalizada</h2>
+      <button class="icon-btn" data-close aria-label="Cerrar">✕</button>
+    </div>
+    <div class="sheet-body">
+      <p class="muted small">Ajusta cada cuerda por semitonos.</p>
+      <div id="customRows"></div>
+      <button class="primary-btn" id="customSave" type="button">Usar esta afinación</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
